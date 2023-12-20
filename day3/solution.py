@@ -70,3 +70,37 @@ with open("input.txt") as input:
 map = check_adjacent_points(matrix, symbol_locations)
 sum = reduce(lambda x,y: x + y, map.values())
 print(sum)
+
+'''
+Part two:
+We're going to iterate over the list of symbols.
+If a symbol is a '*' character, then we will:
+    a) create a map to store distinct adjacent numbers
+    b) iterate over all the adjacent positions. If the
+       adjacent position contains a number, we will 
+       retrieve that number and add it to the map.
+    c) if the map contains exactly two adjacent numbers,
+       we have detected a gear. We will multiply the two
+       numbers and add it to a list of gears.
+    d) after iterating over the entire list of symbols,
+       we simply reduce the list of gears and that is the
+       result
+'''
+def find_gears(matrix, symbols):
+    gears = []
+    for symbol_location in symbols:
+        i, j = symbol_location
+        if matrix[i][j] == "*":
+            adjacent_numbers = {}
+            for adjacent in generate_adjacent_points(symbol_location):
+                if adjacent_value_is_number(matrix, adjacent):
+                    value, left = get_adjacent_number(matrix, adjacent)
+                    idx = (adjacent[0], left)
+                    adjacent_numbers[idx] = value
+            if len(adjacent_numbers) == 2:
+                ratio = reduce(lambda x,y: x*y, adjacent_numbers.values())
+                gears.append(ratio)
+    return gears
+
+gear_sum = reduce(lambda x,y: x+y, find_gears(matrix, symbol_locations))
+print(gear_sum) 
