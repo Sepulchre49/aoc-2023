@@ -173,4 +173,46 @@ clear the value which minimizes F can be found by comparing the minimum values
 of each of the subsets of the range and choosing the smallest one.
 
 How do we keep track of which original inputs caused these outputs though?
+Suppose we start by creating an interval object for each interval in the input
+domain. This interval object should keep track of the lower bound, the upper
+bound or size, and the mapping function to the output.
 
+We initialize a list L to the list of subsets in the seeds domain, where the
+mapping function is x -> x. Then, for each layer we perform the following steps:
+- For each element A of L, for each element D of the domain of the layer, we
+  find the intersection A * D. This intersection defines a new subset of A which
+  uses the mapping of D to find the range of A.
+- After generating all of these intersection mappings, we replace the elements
+  of L with the subsets generating by A * D.
+
+
+Eventually, we will end up with a list of original inputs to final layer
+outputs. All we need to do is simply find the smallest element in the list.
+
+# Time Complexity
+In general, we can create a lightweight set object using O(1) time and O(1)
+space if we simply keep track of the bounds. This assumes that a set contains an
+interval of integers without any gaps.
+
+At each layer, if we have n subsets of the input space and m subsets of the
+layer's domain, then we have n*m pairs of the two subsets.
+
+For each pair of subsets, we must perform the intersection operation. This
+intersection operation can be completed in constant time, because we simply have
+to compare the bounds of both subsets and create a new subset object.
+
+Finally, after getting the final output layer, we have to find the minimum
+element. If the number of subsets in the final output list is n, we can find the
+minimum element in O(n) time.
+
+Also to note, when creating subsets of the domain for each layer, we have to
+consider the domains where the mapping is not explicitly defined. If we have 3
+subsets of the domain of a layer described in the input file, and those subsets
+are called X, Y, and Z respectively, we have to compute Z - X U Y U Z, which
+could at most create 4 disjoint subsets. So, if a layer is described having n
+subsets, we have to consider at most n + n + 1 = 2*n + 1 subsets to find the
+proper mapping of inputs to outputs. 
+
+The actual input provided has 10 subsets of the input space, and the worst layer
+has 44 subsets. Furthermore, we have 7 layers. So, we're performing an O(n*m)
+operation 7 times.
