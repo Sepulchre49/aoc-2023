@@ -46,14 +46,14 @@ function getNextValue(src, tableName)
 	    local diff = src - srcBegin
 	    return v.dest + diff
 	end
-    end
+    end	
     return src
 end
 
 function getSuffix(tableName)
     return tableName:match("%a+$")
 end
---print(getNextValue(maps["seeds"][1], "seed-to-soil"))
+
 local min = math.maxinteger
 for _, seed in pairs(maps["seeds"]) do
     local value = seed
@@ -68,3 +68,28 @@ for _, seed in pairs(maps["seeds"]) do
     if value < min then min = value end
 end
 print(min)
+
+--[[
+-- So the idea for part two:
+-- We have a very very large set of inputs that has to traverse 7 layeres before we get to the output.
+-- Starting with the input domain, if we intersect each subset of the previous layer's output with each
+-- subset of the current layer's inputs, we can find a 1-to-1 mapping from each subset of the input
+-- layer to a subset of the output layer. Once we apply this process to each layer, we simply need to
+-- iterate over all of the output layers until we find the minimum output. This output is guaranteed to
+-- have an input in the original domain.
+--]]
+local Set = require("set")
+local inputs = {}
+
+local i = 1
+while i < #maps["seeds"] do
+    local lower, size = maps["seeds"][i], maps["seeds"][i+1]
+    table.insert(inputs, Set:new(lower, lower + size - 1))
+
+    i = i + 2
+end
+
+local layer = "seeds"
+while layer ~= "location" do
+    local currentTable = getNextTable(layer)
+end
