@@ -1,6 +1,7 @@
 local Interval = {}
 
 function Interval:new(lower, upper)
+    if upper < lower then return error("Invalid bounds. Upper bound must be less than lower bound") end
     local o = {
 	["lower"] = lower or nil,
 	["upper"] = upper or nil,
@@ -15,13 +16,8 @@ function Interval:new(lower, upper)
     return o
 end
 
-function Interval:isEmpty()
-    return not (self.lower and self.upper)
-end
-
 function Interval:size()
-    if self:isEmpty() then return nil end
-    return self.upper - self.lower
+    return self.upper - self.lower + 1
 end
 
 function Interval:intersection(other)
@@ -35,14 +31,35 @@ function Interval:intersection(other)
 end
 
 function Interval:difference(other)
-    if self.upper < other.lower or other.upper < self.lower then
-	return { Interval:new(self.lower, self.upper) }
+    -- If A == B, return nil
+    if self.lower == other.lower and self.upper == other.upper then
+	return {nil}
+    -- If A completely contains B, and A != B, the result will be two 
+    -- disjoint intervals.
     elseif self.lower < other.lower and self.upper > other.upper then
-	return { Interval:new(self.lower, other.lower-1), Interval:new(other.upper+1, self.upper) }
-    elseif other.lower <= self.upper then
-	return { Interval:new(self.lower, other.lower-1) }
-    elseif self.lower <= self.upper then
-	return { Interval:new(other.lower+1, self.upper) }
+	local A = Interval:new(self.lower, other.lower-1)	
+	local B = Interval:new(other.upper+1, self.upper)
+	return { A, B }
+    -- If A and B are completely disjoint, then we return a copy of A
+    elseif self.upper < other.lower or other.upper < self.lower then
+	local A = Interval:new(self.lower, self.upper)
+	return { A }
+    -- Otherwise, we overlap on only one side
+    -- B overlaps A on the right side of A
+    else
+	if self.lower < other.lower then
+	    local A
+	    if self.lower <= other.lower-1 then 
+		A = Interval:new(self.lower, other.lower-1)
+	    end
+	    return { A }
+	else -- B overlaps A on the left side of A
+	    local A
+	    if other.upper+1 <= self.upper then
+		A = Interval:new(other.upper+1, self.upper)
+	    end
+	    return { A }
+	end
     end
 end
 
@@ -62,47 +79,12 @@ function Interval:toString()
 end
 
 if not pcall(debug.getlocal, 4, 1) then
-    local A = Interval:new(1, 10)
-    local B = Interval:new(5, 20)
+    local A = Interval:new(5, 10)
+    local B = Interval:new(15, 20)
+    local C = A - B
 
-    print("A: ", A)
-    print("B: ", B)
-    
-    local C = A * B
-    print("C = A * B: ", C)
-
-    B = Interval:new(11, 20)
-    print("B: ", B)
-    C = A - B
-    print("C = A - B: ", C[1])
-    A.lower = 6
-    print("A: ", A)
-    print("C: ", C[1])
-
-
-    A = Interval:new(1, 100)
-    B = Interval:new(4, 8)
-    C = Interval:new(50, 60)
-    --Z = A - B - C
-
-    A = Interval:new(1, 15)
-    B = Interval:new(16, 30)
-    Z = A + B
-    print(Z[1])
-
-    B = Interval:new(15, 30)
-    Z = A + B
-    print(Z[1])
-
-    B = Interval:new(17, 30)
-    Z = A + B
-    print(Z[1])
-    print(Z[2])
-
-    E = nil
-    D = { Interval:new(10, 20), Interval:new(11, 30), Interval:new(31, 40) }
-    for _, set in pairs(D) do
-	E = set
+    for _, v in pairs(C) do
+	print(v)
     end
 end
 
