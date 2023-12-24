@@ -1,39 +1,74 @@
-local Interval = {}
+local Interval = require("interval")
+local Set = {}
 
-function Interval:new(lower, upper)
+function Set:new(...)
     local o = {
-	["lower"] = lower or nil,
-	["upper"] = upper or nil,
+	["elements"] = {...}
     }
-
     self.__index = self
-    self.__mul = Interval.intersection
+    self.__sub = Set.difference
+    self.__tostring = Set.toString
     setmetatable(o, self)
+
+    o:merge()
     return o
 end
 
-function Interval:isEmpty()
-    return not (self.lower and self.upper)
+function Set:isEmpty()
+    return #self.elements == 0
 end
 
-function Interval:size()
-    if self:isEmpty() then return nil end
-    return self.upper - self.lower
-end
+function Set:merge()
+    if self:isEmpty() then return end
 
-function Interval:intersection(other)
-    if self.upper < other.lower or other.upper < self.lower then 
-	return Interval:new()
+    table.sort(self.elements, function (a,b) return a.lower < b.lower end)
+
+    local merged = {}
+    local current = self.elements[1]
+    for i=2, #self.elements do
+	local next = self.elements[i]
+	if next.lower <= current.upper + 1 then
+	    current = (current + next)[1]
+	else
+	    table.insert(merged, current)
+	    current = next
+	end
     end
 
-    local lower = self.lower > other.lower and self.lower or other.lower
-    local upper = self.upper < other.upper and self.upper or other.upper
-    return self:new(lower, upper)
+    table.insert(merged, current)
+    self.elements = merged
 end
 
-local A = Interval:new(1, 10)
-local B = Interval:new(5, 20)
-local C = A * B
-print(C.lower, C.upper)
+function Set:difference(other)
+    local result = {}
+    for _, interval in ipairs(self.elements) do
+	for _, otherInterval in ipairs(other.elements) do
+	    for _, diffInterval in pairs(interval - otherInterval) do
+		table.insert(result, diffInterval)
+	    end
+	end
+    end
 
-return Interval
+    return Set:new(table.unpack(result))
+end
+
+function Set:toString()
+    if self:isEmpty() then return "{}" end
+
+    local s = "" .. self.elements[1]:toString()
+    for i=2, #self.elements do
+	s = s .. " U " .. self.elements[i]:toString()
+    end
+
+    return s
+end
+if not pcall(debug.getlocal, 4, 1) then
+    local A = Set:new(Interval:new(1, 10), Interval:new(18, 90))
+    local B = Set:new(Interval:new(5, 9), Interval:new(12, 15), Interval:new(18, 30))
+    print(A)
+    print(B)
+    local C = A - B
+    print(C)
+end
+
+return Set
