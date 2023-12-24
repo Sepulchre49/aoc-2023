@@ -83,6 +83,18 @@ function Interval:toString()
     return "[" .. self.lower .. ", " .. self.upper .. "]"
 end
 
+function Interval:lOverlap(other)
+    return other.lower <= self.lower and other.upper <= self.upper
+end
+
+function Interval:rOverlap(other)
+    return other.lower <= self.upper and self.upper <= other.upper
+end
+
+function Interval:contains(other)
+    return self.lower < other.lower and other.lower < other.upper
+end
+
 if not pcall(debug.getlocal, 4, 1) then
     local A = Interval:new(5, 10)
     local B = Interval:new(15, 20)

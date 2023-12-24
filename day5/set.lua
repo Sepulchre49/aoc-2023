@@ -40,16 +40,37 @@ function Set:merge()
 end
 
 function Set:difference(other)
-    local result = {}
-    for _, interval in ipairs(self.elements) do
-	for _, otherInterval in ipairs(other.elements) do
-	    for _, diffInterval in pairs(interval - otherInterval) do
-		table.insert(result, diffInterval)
-	    end
+    local intervals = {}
+    local i, j = 1, 1
+    local curr = self.elements[i]
+
+    while i <= #self.elements and j <= #other.elements do
+	local B = other.elements[j]
+	local diff = curr - B
+	
+	if curr.upper < B.lower then
+		table.insert(intervals, curr)
+		i = i + 1
+		curr = self.elements[i]
+    elseif B.upper < curr.lower then
+		j = j + 1
+	elseif curr:lOverlap(B) then
+	    curr = diff[1]
+	    j = j + 1
+	elseif curr:rOverlap(B) then
+	    table.insert(intervals, diff[1])
+	    i = i + 1
+	    curr = self.elements[i]
+	else
+	    table.insert(intervals, diff[1])
+	    curr = diff[2]
+	    j = j + 1
 	end
     end
 
-    return Set:new(table.unpack(result))
+    table.insert(intervals, curr)
+
+    return Set:new(table.unpack(intervals))
 end
 
 function Set:toString()
@@ -65,10 +86,11 @@ end
 if not pcall(debug.getlocal, 4, 1) then
     local A = Set:new(Interval:new(1, 10), Interval:new(18, 90))
     local B = Set:new(Interval:new(5, 9), Interval:new(12, 15), Interval:new(18, 30))
+    local C = A - B
     print(A)
     print(B)
-    local C = A - B
     print(C)
+
 end
 
 return Set
