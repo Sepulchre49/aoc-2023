@@ -84,7 +84,7 @@ function Interval:toString()
 end
 
 function Interval:lOverlap(other)
-    return other.lower <= self.lower and other.upper <= self.upper
+    return other.lower <= self.lower and other.upper < self.upper
 end
 
 function Interval:rOverlap(other)
