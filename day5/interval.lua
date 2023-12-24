@@ -27,7 +27,7 @@ end
 
 function Interval:intersection(other)
     if self.upper < other.lower or other.upper < self.lower then 
-	return Interval:new()
+	return nil
     end
 
     local lower = self.lower > other.lower and self.lower or other.lower
