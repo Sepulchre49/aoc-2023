@@ -11,6 +11,7 @@ function Interval:new(lower, upper)
     self.__add = Interval.union
     self.__sub = Interval.difference
     self.__mul = Interval.intersection
+    self.__eq  = Interval.equals
     self.__tostring = Interval.toString
     setmetatable(o, self)
     return o
@@ -18,6 +19,10 @@ end
 
 function Interval:size()
     return self.upper - self.lower + 1
+end
+
+function Interval:equals(other)
+    return self.lower == other.lower and self.upper == other.upper
 end
 
 function Interval:intersection(other)
