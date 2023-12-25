@@ -32,7 +32,7 @@ function Interval:intersection(other)
 
     local lower = self.lower > other.lower and self.lower or other.lower
     local upper = self.upper < other.upper and self.upper or other.upper
-    return self:new(lower, upper)
+    return Interval:new(lower, upper)
 end
 
 function Interval:difference(other)
