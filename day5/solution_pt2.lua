@@ -1,8 +1,16 @@
+--[[
+-- So the idea for part two:
+-- We have a very very large set of inputs that has to traverse 7 layeres before we get to the output.
+-- Starting with the input domain, if we intersect each subset of the previous layer's output with each
+-- subset of the current layer's inputs, we can find a 1-to-1 mapping from each subset of the input
+-- layer to a subset of the output layer. Once we apply this process to each layer, we simply need to
+-- iterate over all of the output layers until we find the minimum output. This output is guaranteed to
+-- have an input in the original domain.
+--]]
 local Interval = require("interval")
 local Set = require("set")
-local Z = Set:new(Interval:new(0, math.maxinteger))
 
-io.input("test.txt")
+io.input("input.txt")
 
 local seeds = {}
 
@@ -38,7 +46,7 @@ for line in io.lines() do
 end
 
 for layerName, layer in pairs(layers) do
-    local remaining = Z
+    local remaining = Set:new(Interval:new(0, math.maxinteger))
     for domain, range in pairs(layer) do
 	-- Now, the hardest part is to find Z - the union of all the subintervals of the domain
 	remaining = remaining - Set:new(domain)
@@ -62,11 +70,13 @@ while currentLayer ~= "location" do
 
     local layerMap = {}
     for k, v in pairs(mapping) do
+	    local delta = v.lower - k.lower
 	for d, r in pairs(layers[tableName]) do
-	    local delta = r.lower - d.lower
-	    local newDomain = v * d
-	    if newDomain ~= nil then
-		local newRange = Interval:new(newDomain.lower + delta, newDomain.upper + delta)
+	    local intersection = v * d
+	    if intersection ~= nil then
+            local newDomain = Interval:new(intersection.lower - delta, intersection.upper - delta)
+            local deltaB = r.lower - d.lower
+		local newRange = Interval:new(intersection.lower + deltaB, intersection.upper + deltaB)
 		layerMap[newDomain] = newRange
 	    end
 	end
@@ -82,4 +92,4 @@ for k, v in pairs(mapping) do
     end
 end
 
-print(min)
+print(min.lower)
