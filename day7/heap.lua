@@ -75,14 +75,4 @@ function Heap:swap(i, j)
     self.items[j] = tmp
 end
 
-local myHeap = Heap:new()
-local myList = {5, 3, 9, 12, 4, 8, 2, 7, 6, 1}
-
-for _, v in ipairs(myList) do
-    myHeap:insert(v)
-end
-
-while not myHeap:isEmpty() do
-    local v = myHeap:remove()
-    print(v)
-end
+return Heap
