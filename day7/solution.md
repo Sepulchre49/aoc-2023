@@ -58,3 +58,13 @@ work:
 
 # Sorting
 In order to find the proper ordering, we will use a min heap.
+We will begin by iterating each line in the input. We will create a hand object
+for the current line and insert into the heap.
+
+After all inputs have been created and inserted into the heap, we will
+initialize a counter to 1, and then until the heap is empty we will remove the
+min hand from the heap, multiply that hand's bid value by the counter variable,
+add that product to a running sum, and then increment the counter.
+
+Since we can insert and remove from the heap in O(logn) time, and we have to
+insert and remove n elements, this should take worst case of O(n*logn) time.
