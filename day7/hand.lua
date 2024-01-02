@@ -32,9 +32,7 @@ function Hand:new(hand, bid)
     self.__gt    = Hand.greaterThan
     setmetatable(o, self)
 
-    if hand then
 	o:classify()
-    end
 
     return o
 end
