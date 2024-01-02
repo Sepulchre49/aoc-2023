@@ -57,7 +57,7 @@ function Heap:downheap(idx)
     
     if not l and not r then
 	return
-    elseif current > l or current > r then
+    elseif l and current > l or r and current > r then
         local smallestChildIdx
         if not l then smallestChildIdx = 2*idx + 1
         elseif not r then smallestChildIdx = 2*idx
