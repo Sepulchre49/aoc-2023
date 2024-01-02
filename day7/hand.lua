@@ -29,9 +29,12 @@ function Hand:new(hand, bid)
     self.__index = self
     self.__eq    = Hand.equals
     self.__lt    = Hand.lessThan
+    self.__gt    = Hand.greaterThan
     setmetatable(o, self)
 
-    o:classify()
+    if hand then
+	o:classify()
+    end
 
     return o
 end
